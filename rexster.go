@@ -47,6 +47,24 @@ func (g Graph) QueryVertices(key, value string) (res *Response, err error) {
 	return g.Server.send(url)
 }
 
+func (g Graph) GetVertexBothE(id string) (res *Response, err error) {
+	g.log("GET VERTEX BOTHE", id)
+	url := g.getVertexSubURL(id, "bothE")
+	return g.Server.send(url)
+}
+
+func (g Graph) GetVertexInE(id string) (res *Response, err error) {
+	g.log("GET VERTEX INE", id)
+	url := g.getVertexSubURL(id, "inE")
+	return g.Server.send(url)
+}
+
+func (g Graph) GetVertexOutE(id string) (res *Response, err error) {
+	g.log("GET VERTEX OUTE", id)
+	url := g.getVertexSubURL(id, "outE")
+	return g.Server.send(url)
+}
+
 func (g Graph) Eval(script string) (res *Response, err error) {
 	g.log("EVAL", script)
 	url := g.evalURL(script)
@@ -121,6 +139,11 @@ func (g Graph) queryVerticesURL(key, value string) string {
 	return u.String()
 }
 
+func (g Graph) getVertexSubURL(id, subresource string) string {
+	u := g.getVertexURL(id)
+	return u + "/" + subresource
+}
+
 func (g Graph) evalURL(script string) string {
 	u := g.baseURL()
 	u.Path += "/tp/gremlin"
@@ -160,6 +183,28 @@ func (r *Response) Vertices() (vs []*Vertex) {
 		for i, v := range vv {
 			if v, ok := v.(map[string]interface{}); ok && v["_type"] == "vertex" {
 				vs[i] = &Vertex{v}
+			} else {
+				return nil
+			}
+		}
+	}
+	return
+}
+
+type Edge struct {
+	Map map[string]interface{}
+}
+
+// Edges() gets the array of edges in the response. If the
+// response does not contain an array of edges (i.e., if it
+// contains a single edge not in an array, or a different data
+// type), Edges() returns nil.
+func (r *Response) Edges() (es []*Edge) {
+	if ee, ok := r.Results.([]interface{}); ok {
+		es = make([]*Edge, len(ee))
+		for i, e := range ee {
+			if e, ok := e.(map[string]interface{}); ok && e["_type"] == "edge" {
+				es[i] = &Edge{e}
 			} else {
 				return nil
 			}

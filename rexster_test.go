@@ -92,6 +92,51 @@ func verticesToString(vs []*Vertex) string {
 	return s
 }
 
+func edgeEqualsEdge(e1 *Edge, e2 *Edge) bool {
+	return reflect.DeepEqual(*e1, *e2)
+}
+
+func edgesEqualEdges(es1 []*Edge, es2 []*Edge) bool {
+	if len(es1) != len(es2) {
+		return false
+	}
+	for i, e1 := range es1 {
+		e2 := es2[i]
+		if !edgeEqualsEdge(e1, e2) {
+			return false
+		}
+	}
+	return true
+}
+
+func edgesToString(es []*Edge) string {
+	s := ""
+	for i, e := range es {
+		s += fmt.Sprintf("%v", *e)
+		if i != len(es)-1 {
+			s += ", "
+		}
+	}
+	return s
+}
+
+func TestGetVertexInE(t *testing.T) {
+	r, err := testG.GetVertexInE("2")
+	if err != nil {
+		t.Fatal("failed to get vertex inE:", err)
+	}
+	if es := r.Edges(); es != nil {
+		want := []*Edge{
+			&Edge{Map: map[string]interface{}{"_outV": "1", "_id": "7", "_type": "edge", "_inV": "2", "_label": "knows", "weight": 0.5}},
+		}
+		if !edgesEqualEdges(es, want) {
+			t.Errorf("want %#v, got %#v", edgesToString(want), edgesToString(es))
+		}
+	} else {
+		t.Errorf("edges was nil")
+	}
+}
+
 func TestEval(t *testing.T) {
 	r, err := testG.Eval("g.V[3]")
 	if err != nil {
