@@ -69,6 +69,9 @@ func vertexEqualsVertex(v1 *Vertex, v2 *Vertex) bool {
 }
 
 func verticesEqualsVertices(vs1 []*Vertex, vs2 []*Vertex) bool {
+	if len(vs1) != len(vs2) {
+		return false
+	}
 	for i, v1 := range vs1 {
 		v2 := vs2[i]
 		if !vertexEqualsVertex(v1, v2) {
