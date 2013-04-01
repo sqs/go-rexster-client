@@ -170,7 +170,16 @@ func (r *Response) Vertex() (v *Vertex) {
 }
 
 func (v Vertex) Id() string {
-	return v.Map["_id"].(string)
+	return fmt.Sprintf("%v", v.Map["_id"])
+}
+
+func (v Vertex) Get(key string) string {
+	if x, ok := v.Map[key]; ok {
+		if s, ok := x.(string); ok {
+			return s
+		}
+	}
+	return ""
 }
 
 // Vertices() gets the array of vertices in the response. If the
@@ -211,4 +220,13 @@ func (r *Response) Edges() (es []*Edge) {
 		}
 	}
 	return
+}
+
+func (e Edge) Get(key string) string {
+	if x, ok := e.Map[key]; ok {
+		if s, ok := x.(string); ok {
+			return s
+		}
+	}
+	return ""
 }
