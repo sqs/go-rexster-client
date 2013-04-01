@@ -41,6 +41,12 @@ func (g Graph) GetVertex(id string) (res *Response, err error) {
 	return g.Server.send(url)
 }
 
+func (g Graph) QueryVertices(key, value string) (res *Response, err error) {
+	g.log("QUERY VERTICES", key, value)
+	url := g.queryVerticesURL(key, value)
+	return g.Server.send(url)
+}
+
 func (g Graph) Eval(script string) (res *Response, err error) {
 	g.log("EVAL", script)
 	url := g.evalURL(script)
@@ -107,6 +113,14 @@ func (g Graph) getVertexURL(id string) string {
 	return u.String() + strings.Replace(id, "/", "%2F", -1) // escape slashes
 }
 
+func (g Graph) queryVerticesURL(key, value string) string {
+	u := g.baseURL()
+	u.Path += "/vertices"
+	q := url.Values{"key": {key}, "value": {value}}
+	u.RawQuery = q.Encode()
+	return u.String()
+}
+
 func (g Graph) evalURL(script string) string {
 	u := g.baseURL()
 	u.Path += "/tp/gremlin"
@@ -134,4 +148,22 @@ func (r *Response) Vertex() (v *Vertex) {
 
 func (v Vertex) Id() string {
 	return v.Map["_id"].(string)
+}
+
+// Vertices() gets the array of vertices in the response. If the
+// response does not contain an array of vertices (i.e., if it
+// contains a single vertex not in an array, or a different data
+// type), Vertices() returns nil.
+func (r *Response) Vertices() (vs []*Vertex) {
+	if vv, ok := r.Results.([]interface{}); ok {
+		vs = make([]*Vertex, len(vv))
+		for i, v := range vv {
+			if v, ok := v.(map[string]interface{}); ok && v["_type"] == "vertex" {
+				vs[i] = &Vertex{v}
+			} else {
+				return nil
+			}
+		}
+	}
+	return
 }

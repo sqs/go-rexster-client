@@ -1,6 +1,8 @@
 package rexster_client
 
 import (
+	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -42,6 +44,49 @@ func TestGetVertexURL(t *testing.T) {
 	if u != wantUrl {
 		t.Errorf("want %s, got %s", wantUrl, u)
 	}
+}
+
+func TestQueryVertices(t *testing.T) {
+	r, err := testG.QueryVertices("lang", "java")
+	if err != nil {
+		t.Fatal("failed to query vertices:", err)
+	}
+	if vs := r.Vertices(); vs != nil {
+		want := []*Vertex{
+			&Vertex{Map: map[string]interface{}{"_type": "vertex", "name": "lop", "_id": "3", "lang": "java"}},
+			&Vertex{Map: map[string]interface{}{"lang": "java", "name": "ripple", "_id": "5", "_type": "vertex"}},
+		}
+		if !verticesEqualsVertices(vs, want) {
+			t.Errorf("want %#v, got %#v", verticesToString(want), verticesToString(vs))
+		}
+	} else {
+		t.Errorf("vertices was nil")
+	}
+}
+
+func vertexEqualsVertex(v1 *Vertex, v2 *Vertex) bool {
+	return reflect.DeepEqual(*v1, *v2)
+}
+
+func verticesEqualsVertices(vs1 []*Vertex, vs2 []*Vertex) bool {
+	for i, v1 := range vs1 {
+		v2 := vs2[i]
+		if !vertexEqualsVertex(v1, v2) {
+			return false
+		}
+	}
+	return true
+}
+
+func verticesToString(vs []*Vertex) string {
+	s := ""
+	for i, v := range vs {
+		s += fmt.Sprintf("%v", *v)
+		if i != len(vs)-1 {
+			s += ", "
+		}
+	}
+	return s
 }
 
 func TestEval(t *testing.T) {
