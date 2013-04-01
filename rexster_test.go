@@ -12,6 +12,7 @@ var testG = Graph{
 	Server: Rexster{
 		Host:     "127.0.0.1",
 		RestPort: 8182,
+		Debug:    true,
 	},
 }
 

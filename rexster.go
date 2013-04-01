@@ -15,6 +15,7 @@ import (
 type Rexster struct {
 	Host     string // Rexster server host
 	RestPort uint16 // Rexster server REST API port (usually 8182)
+	Debug    bool   // Enable debug logging
 }
 
 type Graph struct {
@@ -35,26 +36,39 @@ type errorResponse struct {
 }
 
 func (g Graph) GetVertex(id string) (res *Response, err error) {
-	log.Println("GET VERTEX", id)
+	g.log("GET VERTEX", id)
 	url := g.getVertexURL(id).String()
-	return send(url)
+	return g.Server.send(url)
 }
 
 func (g Graph) Eval(script string) (res *Response, err error) {
-	log.Println("EVAL", script)
+	g.log("EVAL", script)
 	url := g.evalURL(script).String()
-	return send(url)
+	return g.Server.send(url)
 }
 
-func send(url string) (resp *Response, err error) {
-	log.Println("HTTP GET", url)
+func (g Graph) log(v ...interface{}) {
+	if g.Server.Debug {
+		vs := []interface{}{"GRAPH", g.Name}
+		vs = append(vs, v...)
+		log.Println(vs...)
+	}
+}
+
+func (r Rexster) send(url string) (resp *Response, err error) {
 	hr, err := http.Get(url)
 	if err != nil {
+		if r.Debug {
+			log.Println("HTTP GET failed", url, err)
+		}
 		return nil, err
 	}
 	resp, errResp := readResponseOrError(hr)
 	if errResp != nil {
 		err = errors.New(strings.TrimSpace(strings.Join([]string{errResp.Message, errResp.Error}, " ")))
+		if r.Debug {
+			log.Println("HTTP GET failed", url, err)
+		}
 	}
 	return
 }
