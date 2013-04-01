@@ -37,13 +37,13 @@ type errorResponse struct {
 
 func (g Graph) GetVertex(id string) (res *Response, err error) {
 	g.log("GET VERTEX", id)
-	url := g.getVertexURL(id).String()
+	url := g.getVertexURL(id)
 	return g.Server.send(url)
 }
 
 func (g Graph) Eval(script string) (res *Response, err error) {
 	g.log("EVAL", script)
-	url := g.evalURL(script).String()
+	url := g.evalURL(script)
 	return g.Server.send(url)
 }
 
@@ -101,18 +101,18 @@ func (g Graph) baseURL() *url.URL {
 	return u
 }
 
-func (g Graph) getVertexURL(id string) *url.URL {
+func (g Graph) getVertexURL(id string) string {
 	u := g.baseURL()
-	u.Path += "/vertices/" + id
-	return u
+	u.Path += "/vertices/"
+	return u.String() + strings.Replace(id, "/", "%2F", -1) // escape slashes
 }
 
-func (g Graph) evalURL(script string) *url.URL {
+func (g Graph) evalURL(script string) string {
 	u := g.baseURL()
 	u.Path += "/tp/gremlin"
 	q := url.Values{"script": []string{script}}
 	u.RawQuery = q.Encode()
-	return u
+	return u.String()
 }
 
 // Data
