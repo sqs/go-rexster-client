@@ -103,8 +103,4 @@ func TestEval(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected Eval to fail, got resp:", r)
 	}
-	msg := "javax.script.ScriptException: groovy.lang.MissingPropertyException: No such property: thiswillfail for class: Script3"
-	if err.Error() != msg {
-		t.Errorf("expected Eval to fail with message '%v', got '%v'", msg, err.Error())
-	}
 }
