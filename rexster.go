@@ -71,6 +71,12 @@ func (g Graph) Eval(script string) (res *Response, err error) {
 	return g.Server.send(url)
 }
 
+func (g Graph) QueryEdges(key, value string) (res *Response, err error) {
+	g.log("QUERY EDGES", key, value)
+	url := g.queryEdgesURL(key, value)
+	return g.Server.send(url)
+}
+
 func (g Graph) log(v ...interface{}) {
 	if g.Server.Debug {
 		vs := []interface{}{"GRAPH", g.Name}
@@ -142,6 +148,14 @@ func (g Graph) queryVerticesURL(key, value string) string {
 func (g Graph) getVertexSubURL(id, subresource string) string {
 	u := g.getVertexURL(id)
 	return u + "/" + subresource
+}
+
+func (g Graph) queryEdgesURL(key, value string) string {
+	u := g.baseURL()
+	u.Path += "/edges"
+	q := url.Values{"key": {key}, "value": {value}}
+	u.RawQuery = q.Encode()
+	return u.String()
 }
 
 func (g Graph) evalURL(script string) string {

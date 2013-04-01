@@ -137,6 +137,24 @@ func TestGetVertexInE(t *testing.T) {
 	}
 }
 
+func TestQueryEdges(t *testing.T) {
+	t.SkipNow() // TODO(sqs): need to add an edge key index to test this
+	r, err := testG.QueryEdges("_label", "created")
+	if err != nil {
+		t.Fatal("failed to query edges:", err)
+	}
+	if es := r.Edges(); es != nil {
+		want := []*Edge{
+		// TODO(sqs): expected data...
+		}
+		if !edgesEqualEdges(es, want) {
+			t.Errorf("want %#v, got %#v", edgesToString(want), edgesToString(es))
+		}
+	} else {
+		t.Errorf("edges was nil")
+	}
+}
+
 func TestEval(t *testing.T) {
 	r, err := testG.Eval("g.V[3]")
 	if err != nil {
