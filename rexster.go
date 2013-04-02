@@ -1,9 +1,11 @@
 package rexster_client
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -38,43 +40,43 @@ type errorResponse struct {
 func (g Graph) GetVertex(id string) (res *Response, err error) {
 	g.log("GetVertex", id)
 	url := g.getVertexURL(id)
-	return g.Server.send(url)
+	return g.Server.get(url)
 }
 
 func (g Graph) QueryVertices(key, value string) (res *Response, err error) {
 	g.log("QueryVertices", key, value)
 	url := g.queryVerticesURL(key, value)
-	return g.Server.send(url)
+	return g.Server.get(url)
 }
 
 func (g Graph) GetVertexBothE(id string) (res *Response, err error) {
 	g.log("GetVertexBothE", id)
 	url := g.getVertexSubURL(id, "bothE")
-	return g.Server.send(url)
+	return g.Server.get(url)
 }
 
 func (g Graph) GetVertexInE(id string) (res *Response, err error) {
 	g.log("GetVertexInE", id)
 	url := g.getVertexSubURL(id, "inE")
-	return g.Server.send(url)
+	return g.Server.get(url)
 }
 
 func (g Graph) GetVertexOutE(id string) (res *Response, err error) {
 	g.log("GetVertexOutE", id)
 	url := g.getVertexSubURL(id, "outE")
-	return g.Server.send(url)
+	return g.Server.get(url)
 }
 
 func (g Graph) QueryEdges(key, value string) (res *Response, err error) {
 	g.log("QueryEdges", key, value)
 	url := g.queryEdgesURL(key, value)
-	return g.Server.send(url)
+	return g.Server.get(url)
 }
 
 func (g Graph) Eval(script string) (res *Response, err error) {
 	g.log("Eval", script)
 	url := g.evalURL(script)
-	return g.Server.send(url)
+	return g.Server.get(url)
 }
 
 func (g Graph) log(v ...interface{}) {
@@ -85,8 +87,24 @@ func (g Graph) log(v ...interface{}) {
 	}
 }
 
-func (r Rexster) send(url string) (resp *Response, err error) {
-	hr, err := http.Get(url)
+func (r Rexster) get(url string) (resp *Response, err error) {
+	return r.send("GET", url, nil)
+}
+
+func (r Rexster) send(method string, url string, data map[string]interface{}) (resp *Response, err error) {
+	var body io.Reader
+	if data != nil {
+		buf, err := json.Marshal(data)
+		if err != nil {
+			return nil, err
+		}
+		body = bytes.NewReader(buf)
+	}
+	req, err := http.NewRequest(method, url, body)
+	if err != nil {
+		return nil, err
+	}
+	hr, err := http.DefaultClient.Do(req)
 	if err != nil {
 		if r.Debug {
 			log.Println("HTTP GET failed", url, err)
