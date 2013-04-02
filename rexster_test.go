@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 )
 
 // Run this test against a Rexster server containing its built-in
@@ -155,6 +156,44 @@ func TestQueryEdges(t *testing.T) {
 	}
 }
 
+func TestCreateOrUpdateVertex(t *testing.T) {
+	v := NewVertex(uniqueId("TestCreateOrUpdate"), map[string]interface{}{"color": "blue"})
+
+	// make sure it doesn't already exist
+	r, err := testG.GetVertex(v.Id())
+	if err == nil || r != nil {
+		t.Fatal("expected vertex to not already exist, but it does", r.Vertex())
+	}
+
+	// create it
+	r, err = testG.CreateOrUpdateVertex(v)
+	if err != nil {
+		t.Fatal("failed to create vertex:", err)
+	}
+	if v.Id() != r.Vertex().Id() {
+		// this could also be caused by the graph DB implementation not
+		// supporting custom IDs (e.g., neo4j).
+		t.Errorf("created vertex %v has a different id from what we created, %v", r.Vertex(), v)
+	}
+	if v.Get("color") != r.Vertex().Get("color") {
+		t.Errorf("created vertex %v has a different color from what we created, %v", r.Vertex(), v)
+	}
+
+	// update it
+	v.Map["color"] = "red"
+	v.Map["radius"] = 3
+	r, err = testG.CreateOrUpdateVertex(v)
+	if err != nil {
+		t.Fatal("failed to update vertex:", err)
+	}
+	if v.Get("color") != r.Vertex().Get("color") {
+		t.Errorf("created vertex %v has a different color from what we updated, %v", r.Vertex(), v)
+	}
+	if v.Map["radius"].(int) != int(r.Vertex().Map["radius"].(float64)) {
+		t.Errorf("created vertex %v has a different radius from what we updated, %v", r.Vertex(), v)
+	}
+}
+
 func TestEval(t *testing.T) {
 	r, err := testG.Eval("g.V[3]")
 	if err != nil {
@@ -169,4 +208,8 @@ func TestEval(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected Eval to fail, got resp:", r)
 	}
+}
+
+func uniqueId(prefix string) string {
+	return fmt.Sprintf("%s_%d", prefix, time.Now().UnixNano())
 }

@@ -79,6 +79,12 @@ func (g Graph) Eval(script string) (res *Response, err error) {
 	return g.Server.get(url)
 }
 
+func (g Graph) CreateOrUpdateVertex(v *Vertex) (res *Response, err error) {
+	g.log("CreateOrUpdateVertex", v.Id())
+	url := g.getVertexURL(v.Id())
+	return g.Server.send("POST", url, v.Map)
+}
+
 func (g Graph) log(v ...interface{}) {
 	if g.Server.Debug {
 		vs := []interface{}{"GRAPH", g.Name}
@@ -104,6 +110,10 @@ func (r Rexster) send(method string, url string, data map[string]interface{}) (r
 	if err != nil {
 		return nil, err
 	}
+	if body != nil {
+		req.Header.Add("Content-Type", "application/json")
+	}
+
 	hr, err := http.DefaultClient.Do(req)
 	if err != nil {
 		if r.Debug {
@@ -188,6 +198,15 @@ func (g Graph) evalURL(script string) string {
 
 type Vertex struct {
 	Map map[string]interface{}
+}
+
+func NewVertex(id string, properties map[string]interface{}) (v *Vertex) {
+	if properties == nil {
+		properties = make(map[string]interface{}, 0)
+	}
+	v = &Vertex{properties}
+	v.Map["_id"] = id
+	return
 }
 
 // Vertex() gets the single vertex in the response. If the response
