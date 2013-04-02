@@ -65,15 +65,15 @@ func (g Graph) GetVertexOutE(id string) (res *Response, err error) {
 	return g.Server.send(url)
 }
 
-func (g Graph) Eval(script string) (res *Response, err error) {
-	g.log("EVAL", script)
-	url := g.evalURL(script)
-	return g.Server.send(url)
-}
-
 func (g Graph) QueryEdges(key, value string) (res *Response, err error) {
 	g.log("QUERY EDGES", key, value)
 	url := g.queryEdgesURL(key, value)
+	return g.Server.send(url)
+}
+
+func (g Graph) Eval(script string) (res *Response, err error) {
+	g.log("EVAL", script)
+	url := g.evalURL(script)
 	return g.Server.send(url)
 }
 
