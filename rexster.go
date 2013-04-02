@@ -142,7 +142,7 @@ func (r Rexster) send(method string, url string, data map[string]interface{}) (r
 	hr, err := http.DefaultClient.Do(req)
 	if err != nil {
 		if r.Debug {
-			log.Println("HTTP GET failed", url, err)
+			log.Printf("HTTP %s failed to %s: %v", method, url, err)
 		}
 		return nil, err
 	}
@@ -150,7 +150,7 @@ func (r Rexster) send(method string, url string, data map[string]interface{}) (r
 	if errResp != nil {
 		err = errors.New(strings.TrimSpace(strings.Join([]string{errResp.Message, errResp.Error}, " ")))
 		if r.Debug {
-			log.Println("HTTP GET failed", url, err)
+			log.Printf("HTTP %s failed to %s: %v", method, url, err)
 		}
 	}
 	return
