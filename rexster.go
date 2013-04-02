@@ -162,7 +162,7 @@ func (g Graph) baseURL() *url.URL {
 func (g Graph) getVertexURL(id string) string {
 	u := g.baseURL()
 	u.Path += "/vertices/"
-	return u.String() + strings.Replace(id, "/", "%2F", -1) // escape slashes
+	return u.String() + escapeSlashes(id)
 }
 
 func (g Graph) queryVerticesURL(key, value string) string {
@@ -192,6 +192,12 @@ func (g Graph) evalURL(script string) string {
 	q := url.Values{"script": []string{script}}
 	u.RawQuery = q.Encode()
 	return u.String()
+}
+
+// Go's url.URL.String() improperly(?) redundantly escapes slashes in
+// the path that are already percent-escaped.
+func escapeSlashes(s string) string {
+	return strings.Replace(s, "/", "%2F", -1)
 }
 
 // Data
