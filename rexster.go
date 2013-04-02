@@ -1,3 +1,10 @@
+// go-rexster-client is a Rexster graph database client for Go. See
+// https://github.com/tinkerpop/rexster/wiki for more information
+// about Rexster.
+//
+// It implements a subset of the
+// Rexster REST API: https://github.com/tinkerpop/rexster/wiki/Basic-REST-API.
+//
 // To use the *Batch functions, you must have the batch kibble
 // installed. See
 // https://github.com/tinkerpop/rexster/tree/master/rexster-kibbles/batch-kibble
