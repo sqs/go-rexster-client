@@ -91,6 +91,12 @@ func (g Graph) CreateOrUpdateVertex(v *Vertex) (res *Response, err error) {
 	return g.Server.send("POST", url, v.Map)
 }
 
+func (g Graph) CreateOrUpdateEdge(e *Edge) (res *Response, err error) {
+	g.log("CreateOrUpdateEdge", e)
+	url := g.getEdgeURL(e.Id())
+	return g.Server.send("POST", url, e.Map)
+}
+
 func (g Graph) log(v ...interface{}) {
 	if g.Server.Debug {
 		vs := []interface{}{"GRAPH", g.Name}
@@ -271,6 +277,18 @@ func (r *Response) Vertices() (vs []*Vertex) {
 
 type Edge struct {
 	Map map[string]interface{}
+}
+
+func NewEdge(id, outV, label, inV string, properties map[string]interface{}) (e *Edge) {
+	if properties == nil {
+		properties = make(map[string]interface{}, 0)
+	}
+	e = &Edge{properties}
+	e.Map["_id"] = id
+	e.Map["_outV"] = outV
+	e.Map["_label"] = label
+	e.Map["_inV"] = inV
+	return
 }
 
 // Edges() gets the array of edges in the response. If the

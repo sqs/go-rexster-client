@@ -214,6 +214,49 @@ func TestCreateOrUpdateVertex(t *testing.T) {
 	}
 }
 
+func TestCreateOrUpdateEdge(t *testing.T) {
+	outV := NewVertex(uniqueId("TestCreateOrUpdateEdge_outV"), nil)
+	inV := NewVertex(uniqueId("TestCreateOrUpdateEdge_inV"), nil)
+	r, _ := testG.CreateOrUpdateVertex(outV)
+	r, _ = testG.CreateOrUpdateVertex(inV)
+
+	e := NewEdge(uniqueId("TestCreateOrUpdateEdge"), outV.Id(), "TestLabel", inV.Id(), map[string]interface{}{"color": "blue"})
+
+	// make sure it doesn't already exist
+	r, err := testG.GetEdge(e.Id())
+	if err == nil || r != nil {
+		t.Fatal("expected edge to not already exist, but it does", r.Edge())
+	}
+
+	// create it
+	r, err = testG.CreateOrUpdateEdge(e)
+	if err != nil {
+		t.Fatal("failed to create edge:", err, e.Map)
+	}
+	if e.Id() != r.Edge().Id() {
+		// this could also be caused by the graph DB implementation not
+		// supporting custom IDs (e.g., neo4j).
+		t.Errorf("created edge %v has a different id from what we created, %v", r.Edge(), e)
+	}
+	if e.Get("color") != r.Edge().Get("color") {
+		t.Errorf("created edge %v has a different color from what we created, %v", r.Edge(), e)
+	}
+
+	// update it
+	e.Map["color"] = "red"
+	e.Map["radius"] = 3
+	r, err = testG.CreateOrUpdateEdge(e)
+	if err != nil {
+		t.Fatal("failed to update edge:", err)
+	}
+	if e.Get("color") != r.Edge().Get("color") {
+		t.Errorf("created edge %v has a different color from what we updated, %v", r.Edge(), e)
+	}
+	if e.Map["radius"].(int) != int(r.Edge().Map["radius"].(float64)) {
+		t.Errorf("created edge %v has a different radius from what we updated, %v", r.Edge(), e)
+	}
+}
+
 func TestEval(t *testing.T) {
 	r, err := testG.Eval("g.V[3]")
 	if err != nil {
