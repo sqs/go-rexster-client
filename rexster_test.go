@@ -159,14 +159,28 @@ func TestGetEdge(t *testing.T) {
 }
 
 func TestQueryEdges(t *testing.T) {
-	t.SkipNow() // TODO(sqs): need to add an edge key index to test this
-	r, err := testG.QueryEdges("_label", "created")
+	key := uniqueId("TestQueryEdges_key")
+	r, err := testG.CreateKeyIndex(EdgeKeyIndex, key)
+	if err != nil {
+		t.Fatalf("failed to create edge key index for key %s: %v", key, err)
+	}
+
+	// make an edge (with outV/inV)
+	outV := NewVertex(uniqueId("TestCreateOrUpdateEdge_outV"), nil)
+	inV := NewVertex(uniqueId("TestCreateOrUpdateEdge_inV"), nil)
+	r, _ = testG.CreateOrUpdateVertex(outV)
+	r, _ = testG.CreateOrUpdateVertex(inV)
+	e := NewEdge(uniqueId("TestQueryEdges_edge"), outV.Id(), "created", inV.Id(), map[string]interface{}{key: "foo", "_type": "edge"})
+	r, _ = testG.CreateOrUpdateEdge(e)
+
+	r, err = testG.QueryEdges(key, "foo")
 	if err != nil {
 		t.Fatal("failed to query edges:", err)
 	}
 	if es := r.Edges(); es != nil {
 		want := []*Edge{
-		// TODO(sqs): expected data...
+			e,
+			// TODO(sqs): expected data...
 		}
 		if !edgesEqualEdges(es, want) {
 			t.Errorf("want %#v, got %#v", edgesToString(want), edgesToString(es))
