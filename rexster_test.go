@@ -157,7 +157,7 @@ func TestQueryEdges(t *testing.T) {
 }
 
 func TestCreateOrUpdateVertex(t *testing.T) {
-	v := NewVertex(uniqueId("TestCreateOrUpdate"), map[string]interface{}{"color": "blue"})
+	v := NewVertex(uniqueId("TestCreateOrUpdateVertex"), map[string]interface{}{"color": "blue"})
 
 	// make sure it doesn't already exist
 	r, err := testG.GetVertex(v.Id())
