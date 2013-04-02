@@ -41,7 +41,7 @@ func TestGetVertex(t *testing.T) {
 
 func TestGetVertexURL(t *testing.T) {
 	u := testG.getVertexURL("has/a/slash")
-	wantUrl := "http://127.0.0.1:8182/graphs/tinkergraph/vertices/has%2Fa%2Fslash"
+	wantUrl := "http://127.0.0.1:8182/graphs/tinkergraph/vertices/has%252Fa%252Fslash"
 	if u != wantUrl {
 		t.Errorf("want %s, got %s", wantUrl, u)
 	}

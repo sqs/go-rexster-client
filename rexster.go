@@ -240,7 +240,7 @@ func (g Graph) getKeyIndexURL(type_ KeyIndexType, key string) string {
 // Go's url.URL.String() improperly(?) redundantly escapes slashes in
 // the path that are already percent-escaped.
 func escapeSlashes(s string) string {
-	return strings.Replace(s, "/", "%2F", -1)
+	return strings.Replace(strings.Replace(s, "/", "%2F", -1), "%", "%25", -1)
 }
 
 // Data
