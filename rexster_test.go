@@ -138,6 +138,26 @@ func TestGetVertexInE(t *testing.T) {
 	}
 }
 
+func TestGetEdge(t *testing.T) {
+	r, err := testG.GetEdge("12")
+	if err != nil {
+		t.Fatal("failed to get edge:", err)
+	}
+	if e := r.Edge(); e.Id() != "12" {
+		t.Errorf("expected _id=12, got %v", e.Id())
+	}
+
+	// try to get a non-existent edge
+	r, err = testG.GetEdge("doesnotexist")
+	if err == nil {
+		t.Fatal("expected GetEdge to fail, got resp:", r)
+	}
+	msg := "Edge with id [doesnotexist] cannot be found."
+	if err.Error() != msg {
+		t.Errorf("expected GetEdge to fail with message '%v', got '%v'", msg, err.Error())
+	}
+}
+
 func TestQueryEdges(t *testing.T) {
 	t.SkipNow() // TODO(sqs): need to add an edge key index to test this
 	r, err := testG.QueryEdges("_label", "created")

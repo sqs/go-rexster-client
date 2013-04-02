@@ -67,6 +67,12 @@ func (g Graph) GetVertexOutE(id string) (res *Response, err error) {
 	return g.Server.get(url)
 }
 
+func (g Graph) GetEdge(id string) (res *Response, err error) {
+	g.log("GetEdge", id)
+	url := g.getEdgeURL(id)
+	return g.Server.get(url)
+}
+
 func (g Graph) QueryEdges(key, value string) (res *Response, err error) {
 	g.log("QueryEdges", key, value)
 	url := g.queryEdgesURL(key, value)
@@ -178,6 +184,12 @@ func (g Graph) getVertexSubURL(id, subresource string) string {
 	return u + "/" + subresource
 }
 
+func (g Graph) getEdgeURL(id string) string {
+	u := g.baseURL()
+	u.Path += "/edges/"
+	return u.String() + escapeSlashes(id)
+}
+
 func (g Graph) queryEdgesURL(key, value string) string {
 	u := g.baseURL()
 	u.Path += "/edges"
@@ -277,6 +289,21 @@ func (r *Response) Edges() (es []*Edge) {
 		}
 	}
 	return
+}
+
+// Edge() gets the single edge in the response. If the response does
+// not contain a single edge (i.e., if it contains multiple edges, or
+// a different data type), Edge() returns nil.
+func (r *Response) Edge() (e *Edge) {
+	if e, ok := r.Results.(map[string]interface{}); ok && e["_type"] == "edge" {
+		return &Edge{e}
+	} else {
+		return nil
+	}
+}
+
+func (e Edge) Id() string {
+	return fmt.Sprintf("%v", e.Map["_id"])
 }
 
 func (e Edge) Get(key string) string {
