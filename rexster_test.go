@@ -65,6 +65,24 @@ func TestQueryVertices(t *testing.T) {
 	}
 }
 
+func TestQueryVerticesBatch(t *testing.T) {
+	r, err := testG.QueryVerticesBatch("name", []string{"peter", "vadas"})
+	if err != nil {
+		t.Fatal("failed to query vertices batch:", err)
+	}
+	if vs := r.Vertices(); vs != nil {
+		want := []*Vertex{
+			&Vertex{Map: map[string]interface{}{"_type": "vertex", "name": "peter", "_id": "6", "age": float64(35)}},
+			&Vertex{Map: map[string]interface{}{"age": float64(27), "name": "vadas", "_id": "2", "_type": "vertex"}},
+		}
+		if !verticesEqualsVertices(vs, want) {
+			t.Errorf("want %#v, got %#v", verticesToString(want), verticesToString(vs))
+		}
+	} else {
+		t.Errorf("vertices was nil")
+	}
+}
+
 func vertexEqualsVertex(v1 *Vertex, v2 *Vertex) bool {
 	return reflect.DeepEqual(*v1, *v2)
 }

@@ -1,3 +1,9 @@
+// To use the *Batch functions, you must have the batch kibble
+// installed. See
+// https://github.com/tinkerpop/rexster/tree/master/rexster-kibbles/batch-kibble
+// for more information. In the Rexster source dir, this means copying
+// batch-kibble-2.4.0-SNAPSHOT.jar to
+// ./rexster-server/target/rexster-server-2.4.0-SNAPSHOT-standalone/lib/.
 package rexster_client
 
 import (
@@ -46,6 +52,14 @@ func (g Graph) GetVertex(id string) (res *Response, err error) {
 func (g Graph) QueryVertices(key, value string) (res *Response, err error) {
 	g.log("QueryVertices", key, value)
 	url := g.queryVerticesURL(key, value)
+	return g.Server.get(url)
+}
+
+// QueryVerticesBatch retrieves all vertices in a key index with any
+// of the specified values. Requires the batch kibble.
+func (g Graph) QueryVerticesBatch(key string, values []string) (res *Response, err error) {
+	g.log("QueryVerticesBatch", key, len(values))
+	url := g.queryVerticesBatchURL(key, values)
 	return g.Server.get(url)
 }
 
@@ -194,6 +208,16 @@ func (g Graph) queryVerticesURL(key, value string) string {
 	u := g.baseURL()
 	u.Path += "/vertices"
 	q := url.Values{"key": {key}, "value": {value}}
+	u.RawQuery = q.Encode()
+	return u.String()
+}
+
+func (g Graph) queryVerticesBatchURL(key string, values []string) string {
+	// TODO(sqs): handle commas in values
+	valuesArray := "[" + strings.Join(values, ",") + "]"
+	u := g.baseURL()
+	u.Path += "/tp/batch/vertices"
+	q := url.Values{"type": {"keyindex"}, "key": {key}, "values": {valuesArray}}
 	u.RawQuery = q.Encode()
 	return u.String()
 }
