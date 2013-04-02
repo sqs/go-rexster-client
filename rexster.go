@@ -36,43 +36,43 @@ type errorResponse struct {
 }
 
 func (g Graph) GetVertex(id string) (res *Response, err error) {
-	g.log("GET VERTEX", id)
+	g.log("GetVertex", id)
 	url := g.getVertexURL(id)
 	return g.Server.send(url)
 }
 
 func (g Graph) QueryVertices(key, value string) (res *Response, err error) {
-	g.log("QUERY VERTICES", key, value)
+	g.log("QueryVertices", key, value)
 	url := g.queryVerticesURL(key, value)
 	return g.Server.send(url)
 }
 
 func (g Graph) GetVertexBothE(id string) (res *Response, err error) {
-	g.log("GET VERTEX BOTHE", id)
+	g.log("GetVertexBothE", id)
 	url := g.getVertexSubURL(id, "bothE")
 	return g.Server.send(url)
 }
 
 func (g Graph) GetVertexInE(id string) (res *Response, err error) {
-	g.log("GET VERTEX INE", id)
+	g.log("GetVertexInE", id)
 	url := g.getVertexSubURL(id, "inE")
 	return g.Server.send(url)
 }
 
 func (g Graph) GetVertexOutE(id string) (res *Response, err error) {
-	g.log("GET VERTEX OUTE", id)
+	g.log("GetVertexOutE", id)
 	url := g.getVertexSubURL(id, "outE")
 	return g.Server.send(url)
 }
 
 func (g Graph) QueryEdges(key, value string) (res *Response, err error) {
-	g.log("QUERY EDGES", key, value)
+	g.log("QueryEdges", key, value)
 	url := g.queryEdgesURL(key, value)
 	return g.Server.send(url)
 }
 
 func (g Graph) Eval(script string) (res *Response, err error) {
-	g.log("EVAL", script)
+	g.log("Eval", script)
 	url := g.evalURL(script)
 	return g.Server.send(url)
 }
