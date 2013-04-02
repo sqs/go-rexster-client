@@ -97,6 +97,19 @@ func (g Graph) CreateOrUpdateEdge(e *Edge) (res *Response, err error) {
 	return g.Server.send("POST", url, e.Map)
 }
 
+type KeyIndexType int
+
+const (
+	VertexKeyIndex KeyIndexType = iota
+	EdgeKeyIndex
+)
+
+func (g Graph) CreateKeyIndex(type_ KeyIndexType, key string) (res *Response, err error) {
+	g.log("CreateKeyIndex", key)
+	url := g.getKeyIndexURL(type_, key)
+	return g.Server.send("POST", url, nil)
+}
+
 func (g Graph) log(v ...interface{}) {
 	if g.Server.Debug {
 		vs := []interface{}{"GRAPH", g.Name}
@@ -209,6 +222,18 @@ func (g Graph) evalURL(script string) string {
 	u.Path += "/tp/gremlin"
 	q := url.Values{"script": []string{script}}
 	u.RawQuery = q.Encode()
+	return u.String()
+}
+
+func (g Graph) getKeyIndexURL(type_ KeyIndexType, key string) string {
+	var typeName string
+	if type_ == VertexKeyIndex {
+		typeName = "vertex"
+	} else if type_ == EdgeKeyIndex {
+		typeName = "edge"
+	}
+	u := g.baseURL()
+	u.Path += "/keyindices/" + typeName + "/" + key
 	return u.String()
 }
 

@@ -273,6 +273,21 @@ func TestEval(t *testing.T) {
 	}
 }
 
+func TestCreateKeyIndex(t *testing.T) {
+	r, err := testG.CreateKeyIndex(VertexKeyIndex, "foo")
+	if err != nil || r == nil {
+		t.Error("failed to create vertex key index:", err)
+	}
+
+	r, err = testG.CreateKeyIndex(EdgeKeyIndex, "foo")
+	if err != nil || r == nil {
+		t.Error("failed to create edge key index:", err)
+	}
+
+	// TODO(sqs): actually test post-conditions instead of just
+	// ensuring no error
+}
+
 func uniqueId(prefix string) string {
 	return fmt.Sprintf("%s_%d", prefix, time.Now().UnixNano())
 }
