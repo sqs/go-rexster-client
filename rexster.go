@@ -100,6 +100,8 @@ func (g Graph) QueryEdges(key, value string) (res *Response, err error) {
 	return g.Server.get(url)
 }
 
+// TODO(sqs): allow passing params to obviate interpolation/avoid
+// injection attacks
 func (g Graph) Eval(script string) (res *Response, err error) {
 	g.log("Eval", script)
 	url := g.evalURL(script)
