@@ -37,6 +37,9 @@ func TestGetVertex(t *testing.T) {
 	if err.Error() != msg {
 		t.Errorf("expected GetVertex to fail with message '%v', got '%v'", msg, err.Error())
 	}
+	if r != nil {
+		t.Errorf("expected GetVertex to have nil response (since no such vertex exists), got '%v'", r)
+	}
 }
 
 func TestGetVertexURL(t *testing.T) {
@@ -302,6 +305,31 @@ func TestEval(t *testing.T) {
 	r, err = testG.Eval("thiswillfail")
 	if err == nil {
 		t.Fatal("expected Eval to fail, got resp:", r)
+	}
+}
+
+func TestBatch(t *testing.T) {
+	v1 := NewVertex(uniqueId("TestBatch_v1"), nil)
+	v1.Map["name"] = v1.Id()
+	v2 := NewVertex(uniqueId("TestBatch_v2"), nil)
+	v2.Map["name"] = v2.Id()
+	r, err := testG.Batch([]TxAction{
+		{Item: v1, Type: Create},
+		{Item: v2, Type: Create},
+	})
+	if err != nil {
+		t.Fatal("failed to run batch:", err)
+	}
+	r, err = testG.QueryVerticesBatch("name", []string{v1.Id(), v2.Id()})
+	if vs := r.Vertices(); vs != nil && len(vs) == 2 {
+		if vs[0].Id() != v1.Id() {
+			t.Errorf("want v1 id %#v, got %#v", v1.Id(), vs[0].Id())
+		}
+		if vs[1].Id() != v2.Id() {
+			t.Errorf("want v2 id %#v, got %#v", v2.Id(), vs[1].Id())
+		}
+	} else {
+		t.Errorf("vertices was nil: %#v", r)
 	}
 }
 

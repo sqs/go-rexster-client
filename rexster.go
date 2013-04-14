@@ -120,6 +120,43 @@ func (g Graph) CreateOrUpdateEdge(e *Edge) (res *Response, err error) {
 	return g.Server.send("POST", url, e.Map)
 }
 
+type VertexOrEdge interface {
+	Id() string
+	GetMap() map[string]interface{}
+	Type() string
+}
+
+type TxActionType string
+
+const (
+	Create TxActionType = "create"
+	Update              = "update"
+	Delete              = "delete"
+)
+
+type TxAction struct {
+	Item VertexOrEdge
+	Type TxActionType
+}
+
+// Execute a batch transaction. See
+// https://github.com/tinkerpop/rexster/tree/master/rexster-kibbles/batch-kibble.
+// TODO(sqs): support update/delete
+func (g Graph) Batch(actions []TxAction) (res *Response, err error) {
+	g.log("Batch", len(actions))
+	actionData := make([]map[string]interface{}, len(actions))
+	for i, a := range actions {
+		actionData[i] = make(map[string]interface{}, len(a.Item.GetMap()))
+		for k, v := range a.Item.GetMap() {
+			actionData[i][k] = v
+		}
+		actionData[i]["_id"] = a.Item.Id()
+		actionData[i]["_type"] = a.Item.Type()
+		actionData[i]["_action"] = string(a.Type)
+	}
+	return g.Server.send("POST", g.batchTxUrl(), map[string]interface{}{"tx": actionData})
+}
+
 type KeyIndexType int
 
 const (
@@ -258,6 +295,12 @@ func (g Graph) evalURL(script string) string {
 	return u.String()
 }
 
+func (g Graph) batchTxUrl() string {
+	u := g.baseURL()
+	u.Path += "/tp/batch/tx"
+	return u.String()
+}
+
 func (g Graph) getKeyIndexURL(type_ KeyIndexType, key string) string {
 	var typeName string
 	if type_ == VertexKeyIndex {
@@ -281,6 +324,9 @@ func escapeSlashes(s string) string {
 type Vertex struct {
 	Map map[string]interface{}
 }
+
+func (v Vertex) GetMap() map[string]interface{} { return v.Map }
+func (v Vertex) Type() string                   { return "vertex" }
 
 func NewVertex(id string, properties map[string]interface{}) (v *Vertex) {
 	if properties == nil {
@@ -336,6 +382,10 @@ func (r *Response) Vertices() (vs []*Vertex) {
 type Edge struct {
 	Map map[string]interface{}
 }
+
+func (e Edge) GetMap() map[string]interface{} { return e.Map }
+
+func (e Edge) Type() string { return "edge" }
 
 func NewEdge(id, outV, label, inV string, properties map[string]interface{}) (e *Edge) {
 	if properties == nil {
