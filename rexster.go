@@ -150,7 +150,9 @@ func (g Graph) Batch(actions []TxAction) (res *Response, err error) {
 		for k, v := range a.Item.GetMap() {
 			actionData[i][k] = v
 		}
-		actionData[i]["_id"] = a.Item.Id()
+		if a.Item.Id() != "" {
+			actionData[i]["_id"] = a.Item.Id()
+		}
 		actionData[i]["_type"] = a.Item.Type()
 		actionData[i]["_action"] = string(a.Type)
 	}
