@@ -9,7 +9,7 @@ It implements a subset of the
 [Rexster REST API](https://github.com/tinkerpop/rexster/wiki/Basic-REST-API).
 
 * API documentation:
-  [go-rexster-client on Sourcegraph](https://sourcegraph.com/repos/github.com/sqs/go-rexster-client)
+  [go-rexster-client on Sourcegraph](https://sourcegraph.com/github.com/sqs/go-rexster-client)
 * Usage examples:
   [rexster_test.go](https://github.com/sqs/go-rexster-client/blob/master/rexster_test.go)
 
